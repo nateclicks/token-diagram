@@ -1,7 +1,10 @@
+import Head from 'next/head';
+import * as React from 'react';
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import * as React from 'react';
 
-export default function App({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: AppProps) {
   return <Component {...pageProps} />;
 }
+
+export default MyApp;
