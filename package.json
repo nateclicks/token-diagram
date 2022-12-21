@@ -9,13 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@state-designer/react": "^3.0.0",
     "@stitches/react": "^1.2.8",
     "@tldraw/core": "^1.20.2",
     "@tldraw/tldraw": "^1.26.2",
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.9",
-    "eslint": "8.28.0",
+    "eslint": "^8.30.0",
     "eslint-config-next": "13.0.5",
     "next": "13.0.5",
     "react": "18.2.0",
