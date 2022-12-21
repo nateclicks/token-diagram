@@ -2,7 +2,6 @@ import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
-import LoadingFiles from './loading-files';
 
 const Editor = dynamic(() => import('../components/Editor'), {
   ssr: false,
@@ -16,8 +15,7 @@ export default function Home() {
       <Head>
         <title>token-diagram</title>
       </Head>
-      <Editor id="home" showUI={!isExportMode} />
-      {/* <LoadingFiles></LoadingFiles> */}
+      <Editor id="home" />
     </>
   );
 }
