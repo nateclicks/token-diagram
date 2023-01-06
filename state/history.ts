@@ -23,7 +23,7 @@ export function makeHistory(ID = '@tldraw/core_advanced_example') {
   function persist(data: AppData) {
     delete data.pageState.hoveredId;
     data.overlays.snapLines = [];
-    // localStorage.setItem(ID, JSON.stringify(data))
+    localStorage.setItem(ID, JSON.stringify(data));
   }
 
   function push(data: AppData) {
@@ -56,7 +56,7 @@ export function makeHistory(ID = '@tldraw/core_advanced_example') {
   function reset(data = INITIAL_DATA) {
     stack = [data];
     pointer = 0;
-    // localStorage.setItem(ID, JSON.stringify(data))
+    localStorage.setItem(ID, JSON.stringify(data));
     persist(data);
     return data;
   }

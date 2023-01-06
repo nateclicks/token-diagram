@@ -1,0 +1,28 @@
+{
+  "root": true,
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off"
+  },
+  "overrides": [
+    {
+      // enable the rule specifically for TypeScript files
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/explicit-module-boundary-types": [0],
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/ban-ts-comment": "off"
+        // "@typescript-eslint/no-unused-vars": [
+        //   "warn",
+        //   {
+        //     "argsIgnorePattern": "^_",
+        //     "varsIgnorePattern": "^_",
+        //     "destructuredArrayIgnorePattern": "^_",
+        //     "caughtErrorsIgnorePattern": "^_"
+        //   }
+        // ]
+      }
+    }
+  ]
+}
