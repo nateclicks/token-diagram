@@ -1,11 +1,11 @@
 import { TLBoundsCorner, TLBoundsEdge, Utils } from '@tldraw/core';
 import { TLDR } from '~state/TLDR';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { TKStatus } from '~types';
 
 describe('Transform single session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1')
       .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: -10, y: -10 })
@@ -17,7 +17,7 @@ describe('Transform single session', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1')
       .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: 5, y: 5 })
@@ -43,7 +43,7 @@ describe('When snapping', () => {
 
 describe('When holding alt', () => {
   it('resizes edge from center', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(app.getShapeBounds('rect1'));
 
@@ -58,7 +58,7 @@ describe('When holding alt', () => {
   });
 
   it('resizes edge from center while holding shift', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(app.getShapeBounds('rect1'));
 
@@ -74,7 +74,7 @@ describe('When holding alt', () => {
   });
 
   it('resizes corner from center', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(app.getShapeBounds('rect1'));
 
@@ -89,7 +89,7 @@ describe('When holding alt', () => {
   });
 
   it('resizes corner from center while holding shift', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(app.getShapeBounds('rect1'));
 

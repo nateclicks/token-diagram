@@ -1,9 +1,9 @@
 import Vec from '@tldraw/vec';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { AlignType, TKShapeType } from '~types';
 
 describe('Align command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   describe('when less than two shapes are selected', () => {
     it('does nothing', () => {
@@ -78,7 +78,7 @@ describe('Align command', () => {
 
 describe('when aligning groups', () => {
   it('aligns children', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .createShapes(
         {
           id: 'rect1',

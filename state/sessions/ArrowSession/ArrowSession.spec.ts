@@ -1,8 +1,8 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { ArrowShape, SessionType, TKShapeType, TKStatus } from '~types';
 
 describe('Arrow session', () => {
-  const restoreDoc = new TldrawTestApp()
+  const restoreDoc = new TkdrawTestApp()
     .loadDocument(mockDocument)
     .selectAll()
     .delete()
@@ -17,7 +17,7 @@ describe('Arrow session', () => {
     ).document;
 
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(restoreDoc)
       .select('arrow1')
       .movePointer([200, 200])
@@ -46,7 +46,7 @@ describe('Arrow session', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(restoreDoc)
       .select('arrow1')
       .movePointer([200, 200])
@@ -60,7 +60,7 @@ describe('Arrow session', () => {
 
   describe('arrow binding', () => {
     it('ignores locked shapes', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('target1')
         .toggleLocked() // set target 1 to locked
@@ -72,7 +72,7 @@ describe('Arrow session', () => {
     });
 
     it('points to the center', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -82,7 +82,7 @@ describe('Arrow session', () => {
     });
 
     it('Snaps to the center', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -92,7 +92,7 @@ describe('Arrow session', () => {
     });
 
     it('Binds at the bottom left', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -102,7 +102,7 @@ describe('Arrow session', () => {
     });
 
     it('Cancels the bind when off of the expanded bounds', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -113,7 +113,7 @@ describe('Arrow session', () => {
     });
 
     it('binds on the inside of a shape while alt is held', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -126,7 +126,7 @@ describe('Arrow session', () => {
     });
 
     it('snaps to the inside center when the point is close to the center', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -137,7 +137,7 @@ describe('Arrow session', () => {
     });
 
     it('ignores binding when meta is held', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(restoreDoc)
         .select('arrow1')
         .movePointer([200, 200])
@@ -150,7 +150,7 @@ describe('Arrow session', () => {
 
   describe('when dragging a bound shape', () => {
     it('updates the arrow', () => {
-      const app = new TldrawTestApp().reset().createShapes(
+      const app = new TkdrawTestApp().reset().createShapes(
         {
           type: TKShapeType.Rectangle,
           id: 'target1',
@@ -209,7 +209,7 @@ describe('Arrow session', () => {
 
 describe('When creating with an arrow session', () => {
   it('Deletes the shape on undo', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .createShapes({
         type: TKShapeType.Arrow,
         id: 'arrow1',
@@ -226,7 +226,7 @@ describe('When creating with an arrow session', () => {
   });
 
   it("Doesn't corrupt a shape after undoing", () => {
-    const app = new TldrawTestApp().reset();
+    const app = new TkdrawTestApp().reset();
 
     expect(app.bindings.length).toBe(0);
 
@@ -273,7 +273,7 @@ describe('When creating with an arrow session', () => {
   });
 
   it('Creates a start binding if possible', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectAll()
       .delete()
       .createShapes(
@@ -306,7 +306,7 @@ describe('When creating with an arrow session', () => {
   });
 
   it('Does not creat a start binding inside of a locked shape', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectAll()
       .delete()
       .createShapes(
@@ -340,7 +340,7 @@ describe('When creating with an arrow session', () => {
   });
 
   it('Creates a start binding if started in dead center', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectAll()
       .delete()
       .createShapes(
@@ -374,7 +374,7 @@ describe('When creating with an arrow session', () => {
   });
 
   it('Removes a binding when dragged away', () => {
-    const app = new TldrawTestApp().reset().createShapes(
+    const app = new TkdrawTestApp().reset().createShapes(
       {
         type: TKShapeType.Rectangle,
         id: 'rect1',
@@ -423,7 +423,7 @@ describe('When creating with an arrow session', () => {
 
 describe('When drawing an arrow', () => {
   it('does not create an arrow less than 4 points long', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Arrow)
       .pointCanvas([100, 100])
       .movePointer([100, 103])
@@ -433,7 +433,7 @@ describe('When drawing an arrow', () => {
   });
 
   it('creates an arrow 4 points long or more', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Arrow)
       .pointCanvas([100, 100])
       .movePointer([100, 104])
@@ -443,7 +443,7 @@ describe('When drawing an arrow', () => {
   });
 
   it('create a short arrow if at least one handle is bound to a shape', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .createShapes({
         type: TKShapeType.Rectangle,
         id: 'rect1',
@@ -459,7 +459,7 @@ describe('When drawing an arrow', () => {
   });
 
   it('does not create a short arrow if no handles are bound', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .createShapes({
         type: TKShapeType.Rectangle,
         id: 'rect1',
@@ -475,7 +475,7 @@ describe('When drawing an arrow', () => {
   });
 
   it('create a short arrow if start handle is bound', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .reset()
       .createShapes({
         type: TKShapeType.Rectangle,
@@ -494,7 +494,7 @@ describe('When drawing an arrow', () => {
 
 describe('When creating arrows inside of other shapes...', () => {
   it('does not bind an arrow to shapes that contain the whole arrow', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .reset()
       .selectTool(TKShapeType.Arrow)
       .createShapes({
@@ -516,7 +516,7 @@ describe('When creating arrows inside of other shapes...', () => {
 
 // describe('When holding alt and dragging a handle', () => {
 //   it('Applies a delta to both handles', () => {
-//     const app = new TldrawTestApp()
+//     const app = new TkdrawTestApp()
 //       .selectAll()
 //       .delete()
 //       .createShapes({ type: TKShapeType.Arrow, id: 'arrow1', point: [0, 0] })

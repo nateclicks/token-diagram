@@ -12,6 +12,8 @@ describe('When migrating bindings', () => {
     const app = new TkdrawApp().loadDocument(
       oldDoc2 as unknown as TokenDocument
     );
+    console.log(app);
+    
     expect(
       app.getShape('d7ab0a49-3cb3-43ae-3d83-f5cf2f4a510a').style.color
     ).toBe('black');

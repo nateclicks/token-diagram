@@ -1,5 +1,5 @@
 import { TkdrawApp } from '~state';
-import { TldrawTestApp } from '~test';
+import { TkdrawTestApp } from '~test';
 import { TKShapeType } from '~types';
 import { DrawTool } from '.';
 
@@ -12,7 +12,7 @@ describe('DrawTool', () => {
 
 describe('When shift+clicking to extend a shape', () => {
   it('extends the same shape', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
     app.reset();
     app.selectTool(TKShapeType.Draw);
     app.pointCanvas([0, 0]);
@@ -27,7 +27,7 @@ describe('When shift+clicking to extend a shape', () => {
   });
 
   it('does not extend after switching tools the same shape', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
     app.reset();
     app.selectTool(TKShapeType.Draw);
     app.pointCanvas([0, 0]);
@@ -43,7 +43,7 @@ describe('When shift+clicking to extend a shape', () => {
   });
 
   it('does not extend after undo', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
     app.reset();
     app.selectTool(TKShapeType.Draw);
     app.pointCanvas([0, 0]);
@@ -58,7 +58,7 @@ describe('When shift+clicking to extend a shape', () => {
   });
 
   it('does not extend if no shape is present', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
     app.reset();
     app.selectTool(TKShapeType.Draw);
     app.pointCanvas({ x: 300, y: 300, shiftKey: true });

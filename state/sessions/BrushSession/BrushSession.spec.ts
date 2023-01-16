@@ -1,9 +1,9 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { SessionType, TKStatus } from '~types';
 
 describe('Brush session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectNone()
       .movePointer([-48, -48])
@@ -15,7 +15,7 @@ describe('Brush session', () => {
   });
 
   it('selects multiple shapes', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectNone()
       .movePointer([-10, -10])
@@ -26,7 +26,7 @@ describe('Brush session', () => {
   });
 
   it('does not de-select original shapes when shift selecting', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectNone()
       .select('rect1')
@@ -38,7 +38,7 @@ describe('Brush session', () => {
   });
 
   it('does not select locked shapes', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectNone()
       .toggleLocked(['rect1'])
@@ -50,7 +50,7 @@ describe('Brush session', () => {
   });
 
   it('when command is held, require the entire shape to be selected', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectNone()
       .movePointer([-10, -10])
@@ -68,7 +68,7 @@ describe('Brush session', () => {
   });
 
   it('selects groups rather than grouped shapes', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectAll()
       .group()

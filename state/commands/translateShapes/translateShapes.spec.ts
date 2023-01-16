@@ -1,8 +1,8 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { ArrowShape, SessionType, TKShapeType } from '~types';
 
 describe('Translate command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);
@@ -138,7 +138,7 @@ describe('Translate command', () => {
 
 describe('When nudging groups', () => {
   it('nudges children instead', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(mockDocument)
       .group(['rect1', 'rect2'], 'groupA')
       .nudge([1, 1])

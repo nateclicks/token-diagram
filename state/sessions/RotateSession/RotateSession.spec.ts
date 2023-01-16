@@ -1,10 +1,10 @@
 import { Utils } from '@tldraw/core';
 import Vec from '@tldraw/vec';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { TKStatus } from '~types';
 
 describe('Rotate session', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   it('begins, updates session', () => {
     app.loadDocument(mockDocument);
@@ -62,7 +62,7 @@ describe('Rotate session', () => {
 
   describe('when rotating a single shape while pressing shift', () => {
     it('Clamps rotation to 15 degrees', () => {
-      const app = new TldrawTestApp();
+      const app = new TkdrawTestApp();
 
       app
         .loadDocument(mockDocument)
@@ -78,7 +78,7 @@ describe('Rotate session', () => {
 
     it('Clamps rotation to 15 degrees when starting from a rotation', () => {
       // Rect 1 is a little rotated
-      const app = new TldrawTestApp();
+      const app = new TkdrawTestApp();
 
       app
         .loadDocument(mockDocument)
@@ -163,7 +163,7 @@ describe('Rotate session', () => {
     );
 
     it('changes the center after nudging', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2');
 

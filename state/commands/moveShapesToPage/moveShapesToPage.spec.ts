@@ -1,8 +1,8 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { ArrowShape, SessionType, TKShapeType } from '~types';
 
 describe('Move to page command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument).createPage('page2').changePage('page1');

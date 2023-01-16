@@ -1,6 +1,6 @@
 import { Utils } from '@tldraw/core';
 import { TLDR } from '~state/TLDR';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import {
   ColorStyle,
   DashStyle,
@@ -9,10 +9,10 @@ import {
   TKShapeType,
 } from '~types';
 
-let app: TldrawTestApp;
+let app: TkdrawTestApp;
 
 beforeEach(() => {
-  app = new TldrawTestApp();
+  app = new TkdrawTestApp();
   app.loadDocument(mockDocument);
 });
 

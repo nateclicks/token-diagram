@@ -1,9 +1,9 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { TKStatus } from '~types';
 
 describe('Grid session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1')
       .pointShape('rect1', [5, 5])
@@ -27,7 +27,7 @@ describe('Grid session', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .pointBounds([5, 5])

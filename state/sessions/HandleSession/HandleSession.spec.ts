@@ -1,9 +1,9 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { SessionType, TKShapeType, TKStatus } from '~types';
 
 describe('Handle session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .createShapes({
         id: 'arrow1',
@@ -21,7 +21,7 @@ describe('Handle session', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .createShapes({
         type: TKShapeType.Arrow,

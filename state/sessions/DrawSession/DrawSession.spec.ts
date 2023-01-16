@@ -1,9 +1,9 @@
-import { TldrawTestApp } from '~test';
+import { TkdrawTestApp } from '~test';
 import { DrawShape, TKShapeType, TKStatus } from '~types';
 
 describe('Draw session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
 
     app
       .selectTool(TKShapeType.Draw)
@@ -19,7 +19,7 @@ describe('Draw session', () => {
   });
 
   it('does, undoes and redoes', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
 
     app
       .selectTool(TKShapeType.Draw)
@@ -43,7 +43,7 @@ describe('Draw session', () => {
 
 describe('When drawing...', () => {
   it('Creates pressure data if not present', () => {
-    const app = new TldrawTestApp().reset();
+    const app = new TkdrawTestApp().reset();
     app
       .selectTool(TKShapeType.Draw)
       .pointCanvas([0, 0])
@@ -69,7 +69,7 @@ describe('When drawing...', () => {
   });
 
   it('Uses pressure data if present', () => {
-    const app = new TldrawTestApp().reset();
+    const app = new TkdrawTestApp().reset();
     app
       .selectTool(TKShapeType.Draw)
       .pointCanvas([0, 0, 0.1])

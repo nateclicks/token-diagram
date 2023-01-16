@@ -1,4 +1,4 @@
-import { TldrawTestApp } from '~test';
+import { TkdrawTestApp } from '~test';
 import {
   ColorStyle,
   DashStyle,
@@ -51,7 +51,7 @@ const textDoc: TokenDocument = {
 
 describe('When creating a shape...', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Text)
       .doubleClickCanvas();
 
@@ -70,7 +70,7 @@ describe('When creating a shape...', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Text)
       .doubleClickCanvas();
 
@@ -95,7 +95,7 @@ describe('When creating a shape...', () => {
   });
 
   it('completes session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Text)
       .doubleClickCanvas();
 
@@ -124,7 +124,7 @@ describe('When creating a shape...', () => {
 
 describe('When editing an existing a shape...', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp().loadDocument(textDoc);
+    const app = new TkdrawTestApp().loadDocument(textDoc);
 
     app.doubleClickShape('text1');
 
@@ -132,7 +132,7 @@ describe('When editing an existing a shape...', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(textDoc)
 
       .doubleClickShape('text1')
@@ -156,7 +156,7 @@ describe('When editing an existing a shape...', () => {
   });
 
   it('completes session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(textDoc)
       .doubleClickShape('text1')
       .onShapeChange({

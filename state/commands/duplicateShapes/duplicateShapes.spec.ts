@@ -1,10 +1,10 @@
 import { Utils } from '@tldraw/core';
 import { TLDR } from '~state/TLDR';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { ArrowShape, SessionType, TKShapeType } from '~types';
 
 describe('Duplicate command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);
@@ -192,7 +192,7 @@ describe('Duplicate command', () => {
 
 describe('when point-duplicating', () => {
   it('duplicates without crashing', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
 
     app
       .loadDocument(mockDocument)
@@ -202,7 +202,7 @@ describe('when point-duplicating', () => {
   });
 
   it('duplicates in the correct place', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
 
     app.loadDocument(mockDocument).group(['rect1', 'rect2']).selectAll();
 

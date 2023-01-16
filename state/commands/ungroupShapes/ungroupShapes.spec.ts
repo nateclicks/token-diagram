@@ -1,8 +1,8 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { GroupShape, TKShapeType } from '~types';
 
 describe('Ungroup command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   it('does, undoes and redoes command', () => {
     app
@@ -70,7 +70,7 @@ describe('Ungroup command', () => {
     });
 
     it('Correctly selects children after ungrouping', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .createShapes(
           {
             id: 'rect1',
@@ -97,7 +97,7 @@ describe('Ungroup command', () => {
     });
 
     it('Reparents shapes to the page at the correct childIndex', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .createShapes(
           {
             id: 'rect1',

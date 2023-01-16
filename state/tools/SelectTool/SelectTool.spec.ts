@@ -1,16 +1,16 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { SessionType, TKShapeType } from '~types';
 import { SelectTool } from '.';
 
 describe('SelectTool', () => {
   it('creates tool', () => {
-    const app = new TldrawTestApp();
+    const app = new TkdrawTestApp();
     new SelectTool(app);
   });
 });
 
 describe('When double clicking link controls', () => {
-  const doc = new TldrawTestApp()
+  const doc = new TkdrawTestApp()
     .createShapes(
       {
         id: 'rect1',
@@ -62,7 +62,7 @@ describe('When double clicking link controls', () => {
     .selectNone().document;
 
   it('moves all linked shapes when center is dragged', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .pointBoundsHandle('center', [100, 100])
@@ -88,7 +88,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('moves all upstream shapes when center is dragged', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .pointBoundsHandle('center')
@@ -100,7 +100,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('moves all downstream shapes when center is dragged', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .pointBoundsHandle('right')
@@ -112,7 +112,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('selects all linked shapes when center is double clicked', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .doubleClickBoundHandle('center')
@@ -120,7 +120,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('selects all linked shapes and arrows when center is double clicked while holding shift', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .doubleClickBoundHandle('center', { shiftKey: true })
@@ -128,7 +128,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('selects all upstream linked shapes when left is double clicked', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .doubleClickBoundHandle('left')
@@ -136,7 +136,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('selects all upstream linked shapes and arrows when left is double clicked with shift', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .doubleClickBoundHandle('left', { shiftKey: true })
@@ -144,7 +144,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('selects all downstream linked shapes when right is double clicked', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .doubleClickBoundHandle('right')
@@ -152,7 +152,7 @@ describe('When double clicking link controls', () => {
   });
 
   it('selects all downstream linked shapes and arrows when right is double clicked with shift', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .loadDocument(doc)
       .select('rect2')
       .doubleClickBoundHandle('right', { shiftKey: true })
@@ -162,7 +162,7 @@ describe('When double clicking link controls', () => {
 
 describe('When selecting grouped shapes', () => {
   it('Selects the group on single click', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .group(['rect1', 'rect2'], 'groupA')
 
@@ -172,7 +172,7 @@ describe('When selecting grouped shapes', () => {
   });
 
   it('Drills in and selects the child on double click', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .group(['rect1', 'rect2'], 'groupA')
       .doubleClickShape('rect1');
@@ -181,7 +181,7 @@ describe('When selecting grouped shapes', () => {
   });
 
   it('Selects a sibling on single click after drilling', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .group(['rect1', 'rect2'], 'groupA')
       .doubleClickShape('rect1')
@@ -191,7 +191,7 @@ describe('When selecting grouped shapes', () => {
   });
 
   it('Selects the group again after selecting a different shape', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectAll()
       .group(['rect1', 'rect2'], 'groupA')
@@ -203,7 +203,7 @@ describe('When selecting grouped shapes', () => {
   });
 
   it('Selects grouped text on double click', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .createShapes({
         id: 'text1',
@@ -218,7 +218,7 @@ describe('When selecting grouped shapes', () => {
   });
 
   it('Edits grouped text on double click after selecting', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .createShapes({
         id: 'text1',

@@ -14868,7 +14868,7 @@ export default {
           point: [0.85, 0.29],
           distance: 0,
         },
-      },
+      }
     },
     'f0ecaa53-8d18-46cc-30cd-4b5927758f7b': {
       id: 'f0ecaa53-8d18-46cc-30cd-4b5927758f7b',

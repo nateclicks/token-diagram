@@ -11,9 +11,9 @@ export function migrate(state: TKSnapshot, newVersion: number): TKSnapshot {
   const { document, settings } = state;
   const { version = 0 } = document;
 
-  // if (!('assets' in document)) {
-  //   document.assets = {};
-  // }
+  if (!('assets' in document)) {
+    document.assets = {};
+  }
 
   // Remove unused assets when loading a document
   const assetIdsInUse = new Set<string>();

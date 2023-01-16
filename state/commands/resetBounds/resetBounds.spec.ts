@@ -1,10 +1,10 @@
 import { TLBoundsCorner, Utils } from '@tldraw/core';
 import { TLDR } from '~state/TLDR';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { SessionType, TKShapeType } from '~types';
 
 describe('Reset bounds command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);

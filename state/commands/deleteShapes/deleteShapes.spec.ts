@@ -1,4 +1,4 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import {
   ColorStyle,
   DashStyle,
@@ -10,7 +10,7 @@ import {
 } from '~types';
 
 describe('Delete command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);
@@ -18,7 +18,7 @@ describe('Delete command', () => {
 
   describe('when no shape is selected', () => {
     it('does nothing', () => {
-      const app = new TldrawTestApp();
+      const app = new TkdrawTestApp();
       const initialapp = app.state;
       app.delete();
       const currentapp = app.state;
@@ -64,7 +64,7 @@ describe('Delete command', () => {
   });
 
   it('deletes bound shapes, undoes and redoes', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .createShapes(
         {
           type: TKShapeType.Rectangle,
@@ -154,7 +154,7 @@ describe('Delete command', () => {
 
   describe('when deleting grouped shapes', () => {
     it('deletes the group too', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .group(['rect1', 'rect2', 'rect3'], 'newGroup')
         .select('rect1', 'rect2', 'rect3')
@@ -172,7 +172,7 @@ describe('Delete command', () => {
 
   describe('when deleting shapes with assets', () => {
     it('should remove the asset from the asset table', () => {
-      const app = new TldrawTestApp().loadDocument(mockDocumentWithImage);
+      const app = new TkdrawTestApp().loadDocument(mockDocumentWithImage);
 
       expect(Object.keys(app.document.assets).length).toBe(1);
 
@@ -188,7 +188,7 @@ describe('Delete command', () => {
     });
 
     it('should not remove a shared asset from the asset table', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocumentWithSharedAssets)
         .delete(['image1']);
 

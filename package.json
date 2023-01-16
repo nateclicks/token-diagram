@@ -58,7 +58,6 @@
       "<rootDir>/dist/"
     ],
     "moduleNameMapper": {
-      "@tldraw/tldraw": "<rootDir>/src",
       "\\~(.*)": "<rootDir>/src/$1"
     }
   }

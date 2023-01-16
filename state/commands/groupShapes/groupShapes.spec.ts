@@ -1,8 +1,8 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { GroupShape, TKShape, TKShapeType } from '~types';
 
 describe('Group command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);
@@ -355,8 +355,10 @@ describe('Group command', () => {
       app.selectAll().group();
 
       expect(app.shapes.length).toBe(4);
-
+      console.log(app.shapes);
       app.selectAll().group();
+
+      console.log(app.shapes);
 
       expect(app.shapes.length).toBe(3);
     });

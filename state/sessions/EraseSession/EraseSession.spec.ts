@@ -1,9 +1,9 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { TKStatus } from '~types';
 
 describe('Draw session', () => {
   it('begins, updates, completes session', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     app.selectTool('erase').pointCanvas([300, 300]);
 
@@ -21,7 +21,7 @@ describe('Draw session', () => {
   });
 
   it('does, undoes and redoes', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .selectTool('erase')
       .pointCanvas([300, 300])

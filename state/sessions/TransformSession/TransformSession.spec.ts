@@ -1,9 +1,9 @@
 import { TLBoundsCorner, TLBoundsEdge, Utils } from '@tldraw/core';
 import { TLDR } from '~state/TLDR';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { TKShapeType, TKStatus } from '~types';
 
-function getShapeBounds(app: TldrawTestApp, ...ids: string[]) {
+function getShapeBounds(app: TkdrawTestApp, ...ids: string[]) {
   return Utils.getCommonBounds(
     (ids.length ? ids : app.selectedIds).map((id) =>
       TLDR.getBounds(app.getShape(id))
@@ -13,7 +13,7 @@ function getShapeBounds(app: TldrawTestApp, ...ids: string[]) {
 
 describe('Transform session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     expect(getShapeBounds(app, 'rect1')).toMatchObject({
       minX: 0,
@@ -56,7 +56,7 @@ describe('Transform session', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: 5, y: 5 })
@@ -68,7 +68,7 @@ describe('Transform session', () => {
 
   describe('when transforming from the top-left corner', () => {
     it('transforms a single shape', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1')
         .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: 0, y: 0 })
@@ -86,7 +86,7 @@ describe('Transform session', () => {
     });
 
     it('transforms a single shape while holding shift', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1')
         .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: 0, y: 0 })
@@ -104,7 +104,7 @@ describe('Transform session', () => {
     });
 
     it('transforms multiple shapes', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: 0, y: 0 })
@@ -131,7 +131,7 @@ describe('Transform session', () => {
     });
 
     it('transforms multiple shapes while holding shift', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .pointBoundsHandle(TLBoundsCorner.TopLeft, { x: 0, y: 0 })
@@ -188,7 +188,7 @@ describe('Transform session', () => {
 
   describe('when transforming a group', () => {
     it('transforms the groups children', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .group(['rect1', 'rect2'], 'groupA')
         .select('groupA')
@@ -219,7 +219,7 @@ describe('Transform session', () => {
 
 describe('When creating with a transform session', () => {
   it('Deletes the shape on undo', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Rectangle)
       .pointCanvas([0, 0])
       .movePointer([5, 5])
@@ -250,7 +250,7 @@ describe('When snapping', () => {
 
 describe('When holding alt', () => {
   it('resizes edge from center', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(
       Utils.getCommonBounds(app.shapes.map(TLDR.getBounds))
@@ -270,7 +270,7 @@ describe('When holding alt', () => {
   });
 
   it('resizes edge from center while holding shift', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(
       Utils.getCommonBounds(app.shapes.map(TLDR.getBounds))
@@ -290,7 +290,7 @@ describe('When holding alt', () => {
   });
 
   it('resizes corner from center', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(
       Utils.getCommonBounds(app.shapes.map(TLDR.getBounds))
@@ -310,7 +310,7 @@ describe('When holding alt', () => {
   });
 
   it('resizes corner from center while holding shift', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     const beforeCenter = Utils.getBoundsCenter(
       Utils.getCommonBounds(app.shapes.map(TLDR.getBounds))

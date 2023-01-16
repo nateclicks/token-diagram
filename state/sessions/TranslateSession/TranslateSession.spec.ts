@@ -1,5 +1,5 @@
 import { Vec } from '@tldraw/vec';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import {
   ArrowShape,
   GroupShape,
@@ -10,7 +10,7 @@ import {
 
 describe('Translate session', () => {
   it('begins, updateSession', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .pointShape('rect1', [5, 5])
       .movePointer([10, 10]);
@@ -33,7 +33,7 @@ describe('Translate session', () => {
   });
 
   it('cancels session', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .pointBounds([5, 5])
@@ -44,7 +44,7 @@ describe('Translate session', () => {
   });
 
   it('moves a single shape', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .pointShape('rect1', [10, 10])
       .movePointer([20, 20])
@@ -54,7 +54,7 @@ describe('Translate session', () => {
   });
 
   it('moves a single shape along a locked axis', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1')
       .pointShape('rect1', [10, 10])
@@ -65,7 +65,7 @@ describe('Translate session', () => {
   });
 
   it('moves two shapes', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .pointBounds([10, 10])
@@ -77,7 +77,7 @@ describe('Translate session', () => {
   });
 
   it('undos and redos clones', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .pointBounds([10, 10])
@@ -99,7 +99,7 @@ describe('Translate session', () => {
   });
 
   it('clones shapes', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .pointBounds([10, 10])
@@ -113,7 +113,7 @@ describe('Translate session', () => {
   });
 
   it('destroys clones when last update is not cloning', () => {
-    const app = new TldrawTestApp().loadDocument(mockDocument);
+    const app = new TkdrawTestApp().loadDocument(mockDocument);
 
     expect(Object.keys(app.getPage().shapes).length).toBe(3);
 
@@ -144,7 +144,7 @@ describe('Translate session', () => {
 
   describe('when translating a child of a group', () => {
     it('translates the shape and updates the groups size / point', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .group(['rect1', 'rect2'], 'groupA')
@@ -170,7 +170,7 @@ describe('Translate session', () => {
     });
 
     it('clones the shape and updates the parent', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .group(['rect1', 'rect2'], 'groupA')
@@ -216,7 +216,7 @@ describe('Translate session', () => {
 
   describe('when translating a shape with children', () => {
     it('translates the shapes children', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .group(['rect1', 'rect2'], 'groupA')
@@ -243,7 +243,7 @@ describe('Translate session', () => {
 
     it('clones the shapes and children', () => {
       expect(() =>
-        new TldrawTestApp()
+        new TkdrawTestApp()
           .loadDocument(mockDocument)
           .select('rect1', 'rect2')
           .group(['rect1', 'rect2'], 'groupA')
@@ -254,7 +254,7 @@ describe('Translate session', () => {
     });
 
     it('deletes clones and restores them', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .group(['rect1', 'rect2'], 'groupA')
@@ -270,7 +270,7 @@ describe('Translate session', () => {
     });
 
     it('deletes clones when not cloning anymore', () => {
-      const app = new TldrawTestApp()
+      const app = new TkdrawTestApp()
         .loadDocument(mockDocument)
         .select('rect1', 'rect2')
         .group(['rect1', 'rect2'], 'groupA')
@@ -286,7 +286,7 @@ describe('Translate session', () => {
 
     it('clones the shapes and children when selecting a group and a different shape', () => {
       expect(() => {
-        new TldrawTestApp()
+        new TkdrawTestApp()
           .loadDocument(mockDocument)
           .select('rect1', 'rect2')
           .group(['rect1', 'rect2'], 'groupA')
@@ -301,7 +301,7 @@ describe('Translate session', () => {
 
 describe('When creating with a translate session', () => {
   it('Deletes the shape on undo', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .selectTool(TKShapeType.Rectangle)
       .pointCanvas([0, 0])
       .movePointer([10, 10])
@@ -336,7 +336,7 @@ describe('When translating linked shapes', () => {
 });
 
 it('destroys bindings from the translating shape', () => {
-  const app = new TldrawTestApp()
+  const app = new TkdrawTestApp()
     .loadDocument(mockDocument)
     .selectAll()
     .delete()
@@ -397,7 +397,7 @@ it('destroys bindings from the translating shape', () => {
 });
 
 it('restores bindings when cancelled', () => {
-  const app = new TldrawTestApp()
+  const app = new TkdrawTestApp()
     .loadDocument(mockDocument)
     .selectAll()
     .delete()

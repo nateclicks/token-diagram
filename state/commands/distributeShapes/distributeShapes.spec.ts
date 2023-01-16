@@ -1,9 +1,9 @@
 import Vec from '@tldraw/vec';
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { DistributeType, TKShapeType } from '~types';
 
 describe('Distribute command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);
@@ -41,7 +41,7 @@ describe('Distribute command', () => {
 
 describe('when distributing groups', () => {
   it('distributes children', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .createShapes(
         {
           id: 'rect1',

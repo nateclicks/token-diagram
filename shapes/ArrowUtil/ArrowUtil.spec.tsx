@@ -1,5 +1,5 @@
 import Vec from '@tldraw/vec';
-import { TldrawTestApp } from '~test';
+import { TkdrawTestApp } from '~test';
 import { ArrowShape, SessionType, TKShapeType } from '~types';
 import { Arrow } from '..';
 
@@ -11,7 +11,7 @@ describe('Arrow shape', () => {
 
 describe('When the arrow has a label...', () => {
   it("Positions a straight arrow's label in the center of the bounding box", () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .resetDocument()
       .createShapes(
         {

@@ -1,8 +1,8 @@
 import { TLDR } from '~state/TLDR';
-import { TldrawTestApp } from '~test';
+import { TkdrawTestApp } from '~test';
 import { TKShapeType, TKSnapshot } from '~types';
 
-const app = new TldrawTestApp().createShapes(
+const app = new TkdrawTestApp().createShapes(
   {
     type: TKShapeType.Rectangle,
     id: 'a',

@@ -161,13 +161,13 @@ export interface TKCallbacks {
     app: TkdrawApp,
     shapes: Record<string, TKShape | undefined>,
     bindings: Record<string, TKBinding | undefined>,
-    // assets: Record<string, TKAsset | undefined>,
+    assets: Record<string, TKAsset | undefined>,
     addToHistory: boolean
   ) => void;
   /**
    * (optional) A callback to run when the user creates a new project.
    */
-  // onChangePresence?: (app: TkdrawApp, user: TKUser) => void;
+  onChangePresence?: (app: TkdrawApp, user: TKUser) => void;
   /**
    * (optional) A callback to run when an asset will be deleted.
    */
@@ -274,7 +274,7 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
   clipboard?: {
     shapes: TKShape[];
     bindings: TKBinding[];
-    // assets: TKAsset[]
+    assets: TKAsset[]
   };
 
   rotationInfo = {
@@ -305,6 +305,597 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
     this.callbacks = callbacks;
   }
 
+  /* -------------------- Internal -------------------- */
+
+  protected migrate = (state: TKSnapshot): TKSnapshot => {
+    return migrate(state, TkdrawApp.version)
+  }
+
+  protected onReady = () => {
+    this.loadDocument(this.document)
+
+    loadFileHandle().then((fileHandle) => {
+      this.fileSystemHandle = fileHandle
+    })
+
+    try {
+      this.patchState({
+        ...migrate(this.state, TkdrawApp.version),
+        appState: {
+          status: TKStatus.Idle,
+        },
+      })
+    } catch (e) {
+      console.error('The data appears to be corrupted. Resetting!', e)
+      localStorage.setItem(this.document.id + '_corrupted', JSON.stringify(this.document))
+
+      this.patchState({
+        ...TkdrawApp.defaultState,
+        appState: {
+          ...TkdrawApp.defaultState.appState,
+          status: TKStatus.Idle,
+        },
+      })
+    }
+
+    this.callbacks.onMount?.(this)
+  }
+
+  /**
+   * Cleanup the state after each state change.
+   * @param state The new state
+   * @param prev The previous state
+   * @protected
+   * @returns The final state
+   */
+  protected cleanup = (state: TKSnapshot, prev: TKSnapshot): TKSnapshot => {
+    const next: TKSnapshot = { ...state }
+
+    // Remove deleted shapes and bindings (in Commands, these will be set to undefined)
+    if (next.document !== prev.document) {
+      Object.entries(next.document.pages).forEach(([pageId, page]) => {
+        if (page === undefined) {
+          // If page is undefined, delete the page and pagestate
+          delete next.document.pages[pageId]
+          delete next.document.pageStates[pageId]
+          return
+        }
+
+        const prevPage = prev.document.pages[pageId]
+
+        const changedShapes: Record<string, TKShape | undefined> = {}
+
+        if (!prevPage || page.shapes !== prevPage.shapes || page.bindings !== prevPage.bindings) {
+          page.shapes = { ...page.shapes }
+          page.bindings = { ...page.bindings }
+
+          const groupsToUpdate = new Set<GroupShape>()
+
+          // If shape is undefined, delete the shape
+          Object.entries(page.shapes).forEach(([id, shape]) => {
+            let parentId: string
+
+            if (!shape) {
+              parentId = prevPage?.shapes[id]?.parentId
+              delete page.shapes[id]
+            } else {
+              parentId = shape.parentId
+            }
+
+            if (page.id === next.appState.currentPageId) {
+              if (prevPage?.shapes[id] !== shape) {
+                changedShapes[id] = shape
+              }
+            }
+
+            // If the shape is the child of a group, then update the group
+            // (unless the group is being deleted too)
+            if (parentId && parentId !== pageId) {
+              const group = page.shapes[parentId]
+              if (group !== undefined) {
+                groupsToUpdate.add(page.shapes[parentId] as GroupShape)
+              }
+            }
+          })
+
+          // If binding is undefined, delete the binding
+          Object.keys(page.bindings).forEach((id) => {
+            if (!page.bindings[id]) {
+              delete page.bindings[id]
+            }
+          })
+
+          next.document.pages[pageId] = page
+
+          // Get bindings related to the changed shapes
+          const bindingsToUpdate = TLDR.getRelatedBindings(next, Object.keys(changedShapes), pageId)
+
+          const visitedShapes = new Set<ArrowShape>()
+
+          // Update all of the bindings we've just collected
+          bindingsToUpdate.forEach((binding) => {
+            if (!page.bindings[binding.id]) {
+              return
+            }
+
+            const toShape = page.shapes[binding.toId]
+            const fromShape = page.shapes[binding.fromId] as ArrowShape
+
+            if (!(toShape && fromShape)) {
+              delete next.document.pages[pageId].bindings[binding.id]
+              return
+            }
+
+            if (visitedShapes.has(fromShape)) {
+              return
+            }
+            // We only need to update the binding's "from" shape (an arrow)
+            const fromDelta = TLDR.updateArrowBindings(page, fromShape)
+            visitedShapes.add(fromShape)
+
+            if (fromDelta) {
+              const nextShape = {
+                ...fromShape,
+                ...fromDelta,
+              } as ArrowShape
+              page.shapes[fromShape.id] = nextShape
+            }
+          })
+
+          groupsToUpdate.forEach((group) => {
+            if (!group) throw Error('no group!')
+            const children = group.children.filter((id) => page.shapes[id] !== undefined)
+
+            const commonBounds = Utils.getCommonBounds(
+              children
+                .map((id) => page.shapes[id])
+                .filter(Boolean)
+                .map((shape) => TLDR.getRotatedBounds(shape))
+            )
+
+            page.shapes[group.id] = {
+              ...group,
+              point: [commonBounds.minX, commonBounds.minY],
+              size: [commonBounds.width, commonBounds.height],
+              children,
+            }
+          })
+        }
+
+        // Clean up page state, preventing hovers on deleted shapes
+
+        const nextPageState: TLPageState = {
+          ...next.document.pageStates[pageId],
+        }
+
+        if (!nextPageState.brush) {
+          delete nextPageState.brush
+        }
+
+        if (nextPageState.hoveredId && !page.shapes[nextPageState.hoveredId]) {
+          delete nextPageState.hoveredId
+        }
+
+        if (nextPageState.bindingId && !page.bindings[nextPageState.bindingId]) {
+          TLDR.warn(`Could not find the binding of ${pageId}`)
+          delete nextPageState.bindingId
+        }
+
+        if (nextPageState.editingId && !page.shapes[nextPageState.editingId]) {
+          TLDR.warn('Could not find the editing shape!')
+          delete nextPageState.editingId
+        }
+
+        next.document.pageStates[pageId] = nextPageState
+      })
+    }
+
+    Object.keys(next.document.assets ?? {}).forEach((id) => {
+      if (!next.document.assets?.[id]) {
+        delete next.document.assets?.[id]
+      }
+    })
+
+    const currentPageId = next.appState.currentPageId
+
+    const currentPageState = next.document.pageStates[currentPageId]
+
+    if (next.room && next.room !== prev.room) {
+      const room = { ...next.room, users: { ...next.room.users } }
+
+      // Remove any exited users
+      if (prev.room) {
+        Object.values(prev.room.users)
+          .filter(Boolean)
+          .forEach((user) => {
+            if (room.users[user.id] === undefined) {
+              delete room.users[user.id]
+            }
+          })
+      }
+
+      next.room = room
+    }
+
+    if (next.room) {
+      next.room.users[next.room.userId] = {
+        ...next.room.users[next.room.userId],
+        point: this.currentPoint,
+        selectedIds: currentPageState.selectedIds,
+      }
+    }
+
+    // Temporary block on editing pages while in readonly mode.
+    // This is a broad solution but not a very good one: the UX
+    // for interacting with a readOnly document will be more nuanced.
+    if (this.readOnly) {
+      next.document.pages = prev.document.pages
+    }
+
+    return next
+  }
+
+  private broadcastPatch = (patch: TkdrawPatch, addToHistory: boolean) => {
+    const changedShapes: Record<string, TKShape | undefined> = {}
+    const changedBindings: Record<string, TKBinding | undefined> = {}
+    const changedAssets: Record<string, TKAsset | undefined> = {}
+
+    const shapes = patch?.document?.pages?.[this.currentPageId]?.shapes
+    const bindings = patch?.document?.pages?.[this.currentPageId]?.bindings
+    const assets = patch?.document?.assets
+
+    if (shapes) {
+      Object.keys(shapes).forEach((id) => {
+        changedShapes[id!] = this.getShape(id, this.currentPageId)
+      })
+    }
+
+    if (bindings) {
+      Object.keys(bindings).forEach((id) => {
+        changedBindings[id] = this.getBinding(id, this.currentPageId)
+      })
+    }
+
+    if (assets) {
+      Object.keys(assets).forEach((id) => {
+        changedAssets[id] = this.document.assets[id]
+      })
+    }
+
+    this.callbacks.onChangePage?.(this, changedShapes, changedBindings, changedAssets, addToHistory)
+  }
+
+  onPatch = (state: TKSnapshot, patch: TkdrawPatch, id?: string) => {
+    if (
+      (this.callbacks.onChangePage && patch?.document?.pages?.[this.currentPageId]) ||
+      patch?.document?.assets
+    ) {
+      if (
+        patch?.document?.assets ||
+        (this.session &&
+          this.session.type !== SessionType.Brush &&
+          this.session.type !== SessionType.Erase &&
+          this.session.type !== SessionType.Draw)
+      ) {
+        this.broadcastPatch(patch, false)
+      }
+    }
+
+    this.callbacks.onPatch?.(this, patch, id)
+  }
+
+  onCommand = (state: TKSnapshot, command: TkdrawCommand, id?: string) => {
+    this.clearSelectHistory()
+    this.isDirty = true
+    this.callbacks.onCommand?.(this, command, id)
+  }
+
+  onReplace = () => {
+    this.clearSelectHistory()
+    this.isDirty = false
+  }
+
+  onUndo = () => {
+    this.rotationInfo.selectedIds = [...this.selectedIds]
+    this.callbacks.onUndo?.(this)
+  }
+
+  onRedo = () => {
+    this.rotationInfo.selectedIds = [...this.selectedIds]
+    this.callbacks.onRedo?.(this)
+  }
+
+  onPersist = (state: TKSnapshot, patch: TkdrawPatch) => {
+    // If we are part of a room, send our changes to the server
+
+    this.callbacks.onPersist?.(this)
+    this.broadcastPatch(patch, true)
+  }
+
+  private prevSelectedIds = this.selectedIds
+
+  /**
+   * Clear the selection history after each new command, undo or redo.
+   * @param state
+   * @param id
+   */
+  protected onStateDidChange = (_state: TKSnapshot, id?: string): void => {
+    this.callbacks.onChange?.(this, id)
+
+    if (this.room && this.selectedIds !== this.prevSelectedIds) {
+      this.callbacks.onChangePresence?.(this, {
+        ...this.room.users[this.room.userId],
+        selectedIds: this.selectedIds,
+        session: !!this.session,
+      })
+      this.prevSelectedIds = this.selectedIds
+    }
+  }
+
+  private preventPaste = () => {
+    if (this.isPastePrevented) return
+
+    const prevent = (event: ClipboardEvent) => event.stopImmediatePropagation()
+
+    const enable = () => {
+      setTimeout(() => {
+        document.removeEventListener('paste', prevent, { capture: true })
+        this.isPastePrevented = false
+      }, 50)
+    }
+
+    document.addEventListener('paste', prevent, { capture: true })
+    window.addEventListener('pointerup', enable, { once: true })
+    this.isPastePrevented = true
+  }
+
+
+  /* ----------- Managing Multiplayer State ----------- */
+
+  private justSent = false
+
+  getReservedContent = (coreReservedIds: string[], pageId = this.currentPageId) => {
+    const { bindings } = this.document.pages[pageId]
+
+    // We want to know which shapes we need to
+    const reservedShapes: Record<string, TKShape> = {}
+    const reservedBindings: Record<string, TKBinding> = {}
+
+    // Quick lookup maps for bindings
+    const bindingsArr = Object.values(bindings)
+    const boundTos = new Map(bindingsArr.map((binding) => [binding.toId, binding]))
+    const boundFroms = new Map(bindingsArr.map((binding) => [binding.fromId, binding]))
+    const bindingMaps = [boundTos, boundFroms]
+
+    // Unique set of shape ids that are going to be reserved
+    const reservedShapeIds: string[] = []
+
+    if (this.session) coreReservedIds.forEach((id) => reservedShapeIds.push(id))
+    if (this.pageState.editingId) reservedShapeIds.push(this.pageState.editingId)
+
+    const strongReservedShapeIds = new Set(reservedShapeIds)
+
+    // Which shape ids have we already visited?
+    const visited = new Set<string>()
+
+    // Time to visit every reserved shape and every related shape and binding.
+    while (reservedShapeIds.length > 0) {
+      const id = reservedShapeIds.pop()
+      if (!id) break
+      if (visited.has(id)) continue
+
+      // Add to set so that we don't process this id a second time
+      visited.add(id)
+
+      // Get the shape and reserve it
+      const shape = this.getShape(id)
+      reservedShapes[id] = shape
+
+      if (shape.parentId !== pageId) reservedShapeIds.push(shape.parentId)
+
+      // If the shape has children, add the shape's children to the list of ids to process
+      if (shape.children) reservedShapeIds.push(...shape.children)
+
+      // If there are binding for this shape, reserve the bindings and
+      // add its related shapes to the list of ids to process
+      bindingMaps
+        .map((map) => map.get(shape.id)!)
+        .filter(Boolean)
+        .forEach((binding) => {
+          reservedBindings[binding.id] = binding
+          reservedShapeIds.push(binding.toId, binding.fromId)
+        })
+    }
+
+    return { reservedShapes, reservedBindings, strongReservedShapeIds }
+  }
+
+  /**
+   * Manually patch in page content.
+   */
+  public replacePageContent = (
+    shapes: Record<string, TKShape>,
+    bindings: Record<string, TKBinding>,
+    assets: Record<string, TKAsset>,
+    pageId = this.currentPageId
+  ): this => {
+    if (this.justSent) {
+      // The incoming update was caused by an update that the client sent, noop.
+      this.justSent = false
+      return this
+    }
+
+    const page = this.document.pages[this.currentPageId]
+
+    Object.values(shapes).forEach((shape) => {
+      if (shape.parentId !== pageId && !(page.shapes[shape.parentId] || shapes[shape.parentId])) {
+        console.warn('Added a shape without a parent on the page')
+        shape.parentId = pageId
+      }
+    })
+
+    this.useStore.setState((current) => {
+      const { hoveredId, editingId, bindingId, selectedIds } = current.document.pageStates[pageId]
+
+      const coreReservedIds = [...selectedIds]
+
+      const editingShape = editingId && current.document.pages[this.currentPageId].shapes[editingId]
+      if (editingShape) coreReservedIds.push(editingShape.id)
+
+      const { reservedShapes, reservedBindings, strongReservedShapeIds } = this.getReservedContent(
+        coreReservedIds,
+        this.currentPageId
+      )
+
+      // Merge in certain changes to reserved shapes
+      Object.values(reservedShapes)
+        // Don't merge updates to shapes with text (Text or Sticky)
+        .filter((reservedShape) => !('text' in reservedShape))
+        .forEach((reservedShape) => {
+          const incomingShape = shapes[reservedShape.id]
+          if (!incomingShape) return
+
+          // If the shape isn't "strongly reserved", then use the incoming shape;
+          // note that this is only if the incoming shape exists! If the shape was
+          // deleted in the incoming shapes, then we'll keep out reserved shape.
+          // This logic would need more work for arrows, because the incoming shape
+          // include a binding change that we'll need to resolve with our reserved bindings.
+          if (
+            !(
+              reservedShape.type === TKShapeType.Arrow ||
+              strongReservedShapeIds.has(reservedShape.id)
+            )
+          ) {
+            shapes[reservedShape.id] = incomingShape
+            return
+          }
+
+          // Only allow certain merges.
+
+          // Allow decorations (of an arrow) to be changed
+          if ('decorations' in incomingShape && 'decorations' in reservedShape) {
+            shapes[reservedShape.id] = { ...reservedShape, decorations: incomingShape.decorations }
+          }
+
+          // Allow the shape's style to be changed
+          reservedShape.style = incomingShape.style
+        })
+
+      // Use the incoming shapes / bindings as comparisons for what
+      // will have changed. This is important because we want to restore
+      // related shapes that may not have changed on our side, but which
+      // were deleted on the server.
+
+      const nextShapes = {
+        ...shapes,
+        ...reservedShapes,
+      }
+
+      if (editingShape) {
+        nextShapes[editingShape.id] = editingShape
+      }
+
+      const nextBindings = {
+        ...bindings,
+        ...reservedBindings,
+      }
+      const nextAssets = {
+        ...assets,
+      }
+
+      const next: TKSnapshot = {
+        ...current,
+        document: {
+          ...current.document,
+          pages: {
+            [pageId]: {
+              ...current.document.pages[pageId],
+              shapes: nextShapes,
+              bindings: nextBindings,
+            },
+          },
+          assets: nextAssets,
+          pageStates: {
+            ...current.document.pageStates,
+            [pageId]: {
+              ...current.document.pageStates[pageId],
+              selectedIds: selectedIds.filter((id) => nextShapes[id] !== undefined),
+              hoveredId: hoveredId
+                ? nextShapes[hoveredId] === undefined
+                  ? undefined
+                  : hoveredId
+                : undefined,
+              editingId: editingId,
+              bindingId: bindingId
+                ? nextBindings[bindingId] === undefined
+                  ? undefined
+                  : bindingId
+                : undefined,
+            },
+          },
+        },
+      }
+      const page = next.document.pages[pageId]
+
+      // Get bindings related to the changed shapes
+      const bindingsToUpdate = TLDR.getRelatedBindings(next, Object.keys(nextShapes), pageId)
+
+      const visitedShapes = new Set<ArrowShape>()
+
+      // Update all of the bindings we've just collected
+      bindingsToUpdate.forEach((binding) => {
+        if (!page.bindings[binding.id]) {
+          return
+        }
+
+        const fromShape = page.shapes[binding.fromId] as ArrowShape
+
+        if (visitedShapes.has(fromShape)) {
+          return
+        }
+
+        // We only need to update the binding's "from" shape (an arrow)
+        const fromDelta = TLDR.updateArrowBindings(page, fromShape)
+        visitedShapes.add(fromShape)
+
+        if (fromDelta) {
+          const nextShape = {
+            ...fromShape,
+            ...fromDelta,
+          } as TKShape
+
+          page.shapes[fromShape.id] = nextShape
+        }
+      })
+
+      Object.values(nextShapes).forEach((shape) => {
+        if (shape.type !== TKShapeType.Group) return
+
+        const children = shape.children.filter((id) => page.shapes[id] !== undefined)
+
+        const commonBounds = Utils.getCommonBounds(
+          children
+            .map((id) => page.shapes[id])
+            .filter(Boolean)
+            .map((shape) => TLDR.getRotatedBounds(shape))
+        )
+
+        page.shapes[shape.id] = {
+          ...shape,
+          point: [commonBounds.minX, commonBounds.minY],
+          size: [commonBounds.width, commonBounds.height],
+          children,
+        }
+      })
+
+      this.state.document = next.document
+
+      return next
+    }, true)
+
+    return this
+  }
+
   /**
    * Set the current status.
    * @param status The new status to set.
@@ -317,7 +908,36 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
         appState: { status },
       },
       `set_status:${status}`
-    );
+    )
+  }
+
+  /**
+   * Update the bounding box when the renderer's bounds change.
+   * @param bounds
+   */
+  updateBounds = (bounds: TLBounds) => {
+    this.rendererBounds = bounds
+    const { point, zoom } = this.camera
+    this.updateViewport(point, zoom)
+
+    if (!this.readOnly && this.session) {
+      this.session.update()
+    }
+  }
+
+  updateViewport = (point: number[], zoom: number) => {
+    const { width, height } = this.rendererBounds
+    const [minX, minY] = Vec.sub(Vec.div([0, 0], zoom), point)
+    const [maxX, maxY] = Vec.sub(Vec.div([width, height], zoom), point)
+
+    this.viewport = {
+      minX,
+      minY,
+      maxX,
+      maxY,
+      height: maxX - minX,
+      width: maxY - minY,
+    }
   }
 
   /**
@@ -325,20 +945,20 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
    * @param id [string]
    */
   setEditingId = (id?: string, isCreating = false) => {
-    if (this.readOnly) return;
+    if (this.readOnly) return
 
     if (id) {
       // Start a new editing session
-      this.startSession(SessionType.Edit, id, isCreating);
+      this.startSession(SessionType.Edit, id, isCreating)
     } else {
       // If we're clearing the editing id and we don't have one, bail
-      if (!this.pageState.editingId) return;
+      if (!this.pageState.editingId) return
 
       // If we're clearing the editing id and we do have one, complete the session
-      this.completeSession();
+      this.completeSession()
     }
 
-    this.editingStartTime = performance.now();
+    this.editingStartTime = performance.now()
 
     this.patchState(
       {
@@ -351,54 +971,8 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
         },
       },
       `set_editing_id`
-    );
-  };
-
-  private preventPaste = () => {
-    if (this.isPastePrevented) return;
-
-    const prevent = (event: ClipboardEvent) => event.stopImmediatePropagation();
-
-    const enable = () => {
-      setTimeout(() => {
-        document.removeEventListener('paste', prevent, { capture: true });
-        this.isPastePrevented = false;
-      }, 50);
-    };
-
-    document.addEventListener('paste', prevent, { capture: true });
-    window.addEventListener('pointerup', enable, { once: true });
-    this.isPastePrevented = true;
-  };
-
-  /**
-   * Update the bounding box when the renderer's bounds change.
-   * @param bounds
-   */
-  updateBounds = (bounds: TLBounds) => {
-    this.rendererBounds = bounds;
-    const { point, zoom } = this.camera;
-    this.updateViewport(point, zoom);
-
-    if (!this.readOnly && this.session) {
-      this.session.update();
-    }
-  };
-
-  updateViewport = (point: number[], zoom: number) => {
-    const { width, height } = this.rendererBounds;
-    const [minX, minY] = Vec.sub(Vec.div([0, 0], zoom), point);
-    const [maxX, maxY] = Vec.sub(Vec.div([width, height], zoom), point);
-
-    this.viewport = {
-      minX,
-      minY,
-      maxX,
-      maxY,
-      height: maxX - minX,
-      width: maxY - minY,
-    };
-  };
+    )
+  }
 
   /**
    * Set or clear the hovered id
@@ -416,8 +990,8 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
         },
       },
       `set_hovered_id`
-    );
-  };
+    )
+  }
 
   /* -------------------------------------------------- */
   /*                    Settings & UI                   */
@@ -873,14 +1447,14 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
       appState: {
         ...TkdrawApp.defaultState.appState,
         ...this.state.appState,
-        // currentPageId: Object.keys(document.pages)[0],
-        // disableAssets: this.disableAssets,
+        currentPageId: Object.keys(document.pages)[0],
+        disableAssets: this.disableAssets,
       },
     };
 
     this.replaceState(migrate(state, TkdrawApp.version), 'loaded_document');
-    // const { point, zoom } = this.camera;
-    // this.updateViewport(point, zoom);
+    const { point, zoom } = this.camera;
+    this.updateViewport(point, zoom);
     this.setIsLoading(false);
     return this;
   };
@@ -891,7 +1465,7 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
    * Create a new project.
    */
   newProject = () => {
-    // if (!this.isLocal) return
+    if (!this.isLocal) return
     this.fileSystemHandle = null;
     this.resetDocument();
   };
@@ -932,7 +1506,7 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
    * @todo
    */
   openProject = async () => {
-    // if (!this.isLocal) return;
+    if (!this.isLocal) return;
 
     try {
       const result = await openFromFileSystem();
@@ -2219,7 +2793,7 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
 
     this.addToSelectHistory(this.selectedIds);
 
-    // this.selectTool('select')
+    this.selectTool('select');
 
     return this;
   };
@@ -3646,6 +4220,66 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
     } else throw new Error('Video with id ' + id + ' not found');
   }
 
+  /**
+   * Get a snapshot of a image (e.g. a GIF) as base64 encoded image
+   * @param id ID of image shape
+   * @returns base64 encoded frame
+   * @throws Error if image shape with given ID does not exist
+   */
+  serializeImage(id: string): string {
+    const image = document.getElementById(id + '_image') as HTMLImageElement
+    if (image) {
+      const canvas = document.createElement('canvas')
+      canvas.width = image.width
+      canvas.height = image.height
+      canvas.getContext('2d')!.drawImage(image, 0, 0)
+      return canvas.toDataURL('image/png')
+    } else throw new Error('Image with id ' + id + ' not found')
+  }
+
+  patchAssets(assets: TKAssets) {
+    this.document.assets = {
+      ...this.document.assets,
+      ...assets,
+    }
+  }
+
+  get room() {
+    return this.state.room
+  }
+
+  get isLocal() {
+    return this.state.room === undefined || this.state.room.id === 'local'
+  }
+
+  get status() {
+    return this.appState.status
+  }
+
+  get currentUser() {
+    if (!this.state.room) return
+    return this.state.room.users[this.state.room.userId]
+  }
+
+  // The center of the component (in screen space)
+  get centerPoint() {
+    const { width, height } = this.rendererBounds
+    return Vec.toFixed([width / 2, height / 2])
+  }
+
+  get currentGrid() {
+    const { zoom } = this.camera
+    if (zoom < 0.15) {
+      return GRID_SIZE * 16
+    } else if (zoom < 1) {
+      return GRID_SIZE * 4
+    } else {
+      return GRID_SIZE * 1
+    }
+  }
+
+  getShapeUtil = TLDR.getShapeUtil;
+
   /* ---------------- */
   /*     OTHER        */
   /* ---------------- */
@@ -3678,24 +4312,9 @@ export class TkdrawApp extends StateManager<TKSnapshot> {
     assets: {},
   };
 
-  // The center of the component (in screen space)
-  get centerPoint() {
-    const { width, height } = this.rendererBounds;
-    return Vec.toFixed([width / 2, height / 2]);
-  }
+  
 
-  get currentGrid() {
-    const { zoom } = this.camera;
-    if (zoom < 0.15) {
-      return GRID_SIZE * 16;
-    } else if (zoom < 1) {
-      return GRID_SIZE * 4;
-    } else {
-      return GRID_SIZE * 1;
-    }
-  }
 
-  getShapeUtil = TLDR.getShapeUtil;
 
   static defaultState: TKSnapshot = {
     settings: {

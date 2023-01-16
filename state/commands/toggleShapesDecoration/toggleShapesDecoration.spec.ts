@@ -1,10 +1,10 @@
-import { TldrawTestApp } from '~test';
+import { TkdrawTestApp } from '~test';
 import { ArrowShape, Decoration, TKShapeType } from '~types';
 
 describe('Toggle decoration command', () => {
   describe('when no shape is selected', () => {
     it('does nothing', () => {
-      const app = new TldrawTestApp();
+      const app = new TkdrawTestApp();
       const initialState = app.state;
       app.toggleDecoration('start');
       const currentState = app.state;
@@ -15,7 +15,7 @@ describe('Toggle decoration command', () => {
 
   describe('when handle id is invalid', () => {
     it('does nothing', () => {
-      const app = new TldrawTestApp();
+      const app = new TkdrawTestApp();
       const initialState = app.state;
       app.toggleDecoration('invalid');
       const currentState = app.state;
@@ -25,7 +25,7 @@ describe('Toggle decoration command', () => {
   });
 
   it('does, undoes and redoes command', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .createShapes({
         id: 'arrow1',
         type: TKShapeType.Arrow,

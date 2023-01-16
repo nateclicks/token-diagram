@@ -1,8 +1,8 @@
-import { TldrawTestApp, mockDocument } from '~test';
+import { TkdrawTestApp, mockDocument } from '~test';
 import { RectangleShape, StretchType, TKShapeType } from '~types';
 
 describe('Stretch command', () => {
-  const app = new TldrawTestApp();
+  const app = new TkdrawTestApp();
 
   beforeEach(() => {
     app.loadDocument(mockDocument);
@@ -88,7 +88,7 @@ describe('Stretch command', () => {
 
 describe('when running the command', () => {
   it('restores selection on undo', () => {
-    const app = new TldrawTestApp()
+    const app = new TkdrawTestApp()
       .loadDocument(mockDocument)
       .select('rect1', 'rect2')
       .stretch(StretchType.Horizontal)
@@ -105,7 +105,7 @@ describe('when running the command', () => {
 
 describe('when stretching groups', () => {
   it('stretches children', () => {
-    new TldrawTestApp()
+    new TkdrawTestApp()
       .createShapes(
         {
           id: 'rect1',
